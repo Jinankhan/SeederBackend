@@ -14,8 +14,13 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 public class UserController {
 
-  @Autowired
+
   private IUserService iUserService;
+  @Autowired
+  public  UserController(IUserService iUserService)
+  {
+    this.iUserService=iUserService;
+  }
 
   @GetMapping("/email")
   public ResponseEntity<GetUserResponse> getUserByEmail(

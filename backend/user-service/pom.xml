@@ -19,7 +19,6 @@
 			<sonar.organization>jinankhan</sonar.organization>
 			<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 		<sonar.exclusions>
-			./pom.xml,
 			**/dto/**,
 			**/entity/**,
 			**/exception/**,

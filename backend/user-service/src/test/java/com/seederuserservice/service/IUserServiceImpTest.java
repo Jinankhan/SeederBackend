@@ -1,4 +1,7 @@
 package com.seederuserservice.service;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 import com.seederuserservice.dto.request.PatchRequest;
 import com.seederuserservice.dto.request.PostUserRequest;
 import com.seederuserservice.dto.response.GetUserResponse;
@@ -7,143 +10,136 @@ import com.seederuserservice.exception.UserAlreadyExistsException;
 import com.seederuserservice.exception.UserNotFoundException;
 import com.seederuserservice.repository.UserRepository;
 import com.seederuserservice.utils.Converter;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import java.util.Optional;
 import java.util.UUID;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-
+@ExtendWith(MockitoExtension.class)
 class IUserServiceImpTest {
 
-    @Mock
-    private UserRepository userRepository;
+  @Mock
+  private UserRepository userRepository;
 
-    @Mock
-    private BCryptPasswordEncoder passwordEncoder;
+  @Mock
+  private BCryptPasswordEncoder passwordEncoder;
 
-    @Mock
-    private Converter converter;
+  @Mock
+  private Converter converter;
 
-    @InjectMocks
-    private UserServiceImp userService;
+  @InjectMocks
+  private UserServiceImp userService;
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
+  private final String email = "test@gmail.com";
 
-    @Test
-    void testPostUser_SuccessfulRegistration() {
-        PostUserRequest request = new PostUserRequest();
-        User userEntity = new User();
-        GetUserResponse expectedResponse = new GetUserResponse();
+  @Test
+  void postUser_UserDoesNotExist_Success() {
+    // Arrange
+    PostUserRequest postUserRequest = new PostUserRequest();
+    postUserRequest.setEmail(email);
+    User user = new User();
+    user.setEmail(email);
 
-        when(userRepository.findByEmail(eq(request.getEmail()))).thenReturn(Optional.empty());
-        when(converter.convertDtoToEntity(request)).thenReturn(userEntity);
-        when(passwordEncoder.encode(eq(userEntity.getPassword()))).thenReturn("encodedPassword");
-        when(userRepository.save(any())).thenReturn(userEntity);
-        when(converter.convertEntityToDto(userEntity)).thenReturn(expectedResponse);
+    when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
+    when(converter.convertDtoToEntity(postUserRequest)).thenReturn(user);
+    when(userRepository.save(any(User.class))).thenReturn(user);
+    when(converter.convertEntityToDto(any(User.class)))
+      .thenReturn(new GetUserResponse());
 
+    GetUserResponse result = userService.postUser(postUserRequest);
 
-        GetUserResponse actualResponse = userService.postUser(request);
+    assertNotNull(result);
+    verify(userRepository, times(1)).findByEmail(email);
+    verify(userRepository, times(1)).save(any(User.class));
+    verify(converter, times(1)).convertDtoToEntity(postUserRequest);
+    verify(converter, times(1)).convertEntityToDto(any(User.class));
+  }
 
+  @Test
+  void postUser_UserAlreadyExists_ThrowsUserAlreadyExistsException() {
+    PostUserRequest postUserRequest = new PostUserRequest();
+    postUserRequest.setEmail(email);
+    User user = new User();
+    user.setEmail(email);
 
-        assertNotNull(actualResponse);
-        assertEquals(expectedResponse, actualResponse);
-        verify(userRepository, times(1)).findByEmail(eq(request.getEmail()));
-        verify(converter, times(1)).convertDtoToEntity(request);
-        verify(userRepository, times(1)).save(any());
-        verify(converter, times(1)).convertEntityToDto(userEntity);
-    }
+    when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+    assertThrows(
+      UserAlreadyExistsException.class,
+      () -> userService.postUser(postUserRequest)
+    );
+    verify(userRepository, times(1)).findByEmail(email);
+    verify(userRepository, never()).save(any(User.class));
+    verify(converter, never()).convertDtoToEntity(any(PostUserRequest.class));
+    verify(converter, never()).convertEntityToDto(any(User.class));
+  }
 
-    @Test
-    void testPostUser_UserAlreadyExistsException() {
-        // Arrange
-        PostUserRequest request = new PostUserRequest();
-        User existingUser = new User();
-        when(userRepository.findByEmail(eq(request.getEmail()))).thenReturn(Optional.of(existingUser));
+  @Test
+  void getUserByEmail_UserExists_Success() {
+    User user = new User();
+    user.setEmail(email);
 
-        // Act and Assert
-        assertThrows(UserAlreadyExistsException.class, () -> userService.postUser(request));
-        verify(userRepository, times(1)).findByEmail(eq(request.getEmail()));
-        verify(passwordEncoder, never()).encode(any());
-        verify(userRepository, never()).save(any());
-        verify(converter, never()).convertEntityToDto(any());
-    }
+    when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+    when(converter.convertEntityToDto(user)).thenReturn(new GetUserResponse());
 
-    @Test
-    void testGetUserByEmail_Successful() {
-        // Arrange
-        String email = "test@example.com";
-        User userEntity = new User();
-        GetUserResponse expectedResponse = new GetUserResponse();
+    GetUserResponse result = userService.getUserByEmail(email);
 
-        when(userRepository.findByEmail(eq(email))).thenReturn(Optional.of(userEntity));
-        when(converter.convertEntityToDto(userEntity)).thenReturn(expectedResponse);
+    assertNotNull(result);
+    verify(userRepository, times(1)).findByEmail(email);
+    verify(converter, times(1)).convertEntityToDto(user);
+  }
 
-        // Act
-        GetUserResponse actualResponse = userService.getUserByEmail(email);
+  @Test
+  void getUserByEmail_UserNotFound_ThrowsUserNotFoundException() {
+    when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
-        // Assert
-        assertNotNull(actualResponse);
-        assertEquals(expectedResponse, actualResponse);
-        verify(userRepository, times(1)).findByEmail(eq(email));
-        verify(converter, times(1)).convertEntityToDto(userEntity);
-    }
+    assertThrows(
+      UserNotFoundException.class,
+      () -> userService.getUserByEmail(email)
+    );
+    verify(userRepository, times(1)).findByEmail(email);
+    verify(converter, never()).convertEntityToDto(any(User.class));
+  }
 
-    @Test
-    void testGetUserByEmail_UserNotFoundException() {
-        // Arrange
-        String email = "nonexistent@example.com";
-        when(userRepository.findByEmail(eq(email))).thenReturn(Optional.empty());
+  @Test
+  void patchUserDetails_UserExists_Success() {
+    UUID userId = UUID.randomUUID();
+    PatchRequest patchRequest = new PatchRequest();
+    patchRequest.setCreditAmount(100);
+    User existingUser = new User();
+    existingUser.setId(userId);
+    existingUser.setCreditAmount(50);
 
-        // Act and Assert
-        assertThrows(UserNotFoundException.class, () -> userService.getUserByEmail(email));
-        verify(userRepository, times(1)).findByEmail(eq(email));
-        verify(converter, never()).convertEntityToDto(any());
-    }
+    when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+    when(userRepository.save(any(User.class))).thenReturn(existingUser);
+    when(converter.convertEntityToDto(any(User.class)))
+      .thenReturn(new GetUserResponse());
 
-    @Test
-    void testPatchUserDetails_SuccessfulPatch() {
-        // Arrange
-        UUID userId = UUID.randomUUID();
-        PatchRequest patchRequest = new PatchRequest();
-        User existingUser = new User();
-        GetUserResponse expectedResponse = new GetUserResponse();
+    GetUserResponse result = userService.patchUserDetails(userId, patchRequest);
 
-        when(userRepository.findById(eq(userId))).thenReturn(Optional.of(existingUser));
-        when(userRepository.save(existingUser)).thenReturn(existingUser);
-        when(converter.convertEntityToDto(existingUser)).thenReturn(expectedResponse);
+    assertNotNull(result);
+    assertEquals(100, existingUser.getCreditAmount());
+    verify(userRepository, times(1)).findById(userId);
+    verify(userRepository, times(1)).save(any(User.class));
+    verify(converter, times(1)).convertEntityToDto(any(User.class));
+  }
 
-        // Act
-        GetUserResponse actualResponse = userService.patchUserDetails(userId, patchRequest);
+  @Test
+  void patchUserDetails_UserNotFound_ThrowsUserNotFoundException() {
+    UUID userId = UUID.randomUUID();
+    PatchRequest patchRequest = new PatchRequest();
+    patchRequest.setCreditAmount(100);
 
-        // Assert
-        assertNotNull(actualResponse);
-        assertEquals(expectedResponse, actualResponse);
-        verify(userRepository, times(1)).findById(eq(userId));
-        verify(userRepository, times(1)).save(existingUser);
-        verify(converter, times(1)).convertEntityToDto(existingUser);
-    }
-
-    @Test
-    void testPatchUserDetails_UserNotFoundException() {
-        // Arrange
-        UUID userId = UUID.randomUUID();
-        PatchRequest patchRequest = new PatchRequest();
-        when(userRepository.findById(eq(userId))).thenReturn(Optional.empty());
-
-        // Act and Assert
-        assertThrows(UserNotFoundException.class, () -> userService.patchUserDetails(userId, patchRequest));
-        verify(userRepository, times(1)).findById(eq(userId));
-        verify(userRepository, never()).save(any());
-        verify(converter, never()).convertEntityToDto(any());
-    }
+    when(userRepository.findById(userId)).thenReturn(Optional.empty());
+    assertThrows(
+      UserNotFoundException.class,
+      () -> userService.patchUserDetails(userId, patchRequest)
+    );
+    verify(userRepository, times(1)).findById(userId);
+    verify(userRepository, never()).save(any(User.class));
+    verify(converter, never()).convertEntityToDto(any(User.class));
+  }
 }

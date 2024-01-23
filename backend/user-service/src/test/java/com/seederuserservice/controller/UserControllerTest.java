@@ -1,10 +1,13 @@
 package com.seederuserservice.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import com.seederuserservice.dto.request.PatchRequest;
 import com.seederuserservice.dto.request.PostUserRequest;
 import com.seederuserservice.dto.response.GetUserResponse;
 import com.seederuserservice.service.IUserService;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -13,61 +16,60 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(MockitoExtension.class)
 class UserControllerTest {
 
-    @Mock
-    private IUserService iUserService;
+  @Mock
+  private IUserService iUserService;
 
-    @InjectMocks
-    private UserController userController;
+  @InjectMocks
+  private UserController userController;
 
-    @Test
-    void testGetUserByEmail() {
-        // Mocking the service response
-        GetUserResponse mockResponse = new GetUserResponse(/* mock data */);
-        when(iUserService.getUserByEmail(anyString())).thenReturn(mockResponse);
+  private final String email = "test@gmail.com";
 
-        // Calling the controller method
-        ResponseEntity<GetUserResponse> responseEntity = userController.getUserByEmail("test@example.com");
+  private GetUserResponse createMockResponse() {
+    return new GetUserResponse(UUID.randomUUID(), 880000, email, "test");
+  }
 
-        // Assertions
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertEquals(mockResponse, responseEntity.getBody());
-    }
+  @Test
+  void testGetUserByEmail() {
+    GetUserResponse mockResponse = createMockResponse();
 
-    @Test
-    void testPatchUser() {
-        // Mocking the service response
-        GetUserResponse mockResponse = new GetUserResponse(/* mock data */);
-        when(iUserService.patchUserDetails(any(UUID.class), any(PatchRequest.class))).thenReturn(mockResponse);
+    when(iUserService.getUserByEmail(email)).thenReturn(mockResponse);
 
-        // Calling the controller method
-        ResponseEntity<GetUserResponse> responseEntity = userController.patchUse(UUID.randomUUID(), new PatchRequest(/* mock data */));
+    ResponseEntity<GetUserResponse> responseEntity = userController.getUserByEmail(
+      email
+    );
+    assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+    assertEquals(mockResponse, responseEntity.getBody());
+  }
 
-        // Assertions
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertEquals(mockResponse, responseEntity.getBody());
-    }
+  @Test
+  void testPatchUser() {
+    GetUserResponse mockResponse = createMockResponse();
+    when(
+      iUserService.patchUserDetails(any(UUID.class), any(PatchRequest.class))
+    )
+      .thenReturn(mockResponse);
 
-    @Test
-    void testSignUpUser() {
-        // Mocking the service response
-        GetUserResponse mockResponse = new GetUserResponse(/* mock data */);
-        when(iUserService.postUser(any(PostUserRequest.class))).thenReturn(mockResponse);
+    ResponseEntity<GetUserResponse> responseEntity = userController.patchUse(
+      UUID.randomUUID(),
+      new PatchRequest()
+    );
+    assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+    assertEquals(mockResponse, responseEntity.getBody());
+  }
 
-        // Calling the controller method
-        ResponseEntity<GetUserResponse> responseEntity = userController.signUpUser(new PostUserRequest(/* mock data */));
+  @Test
+  void testSignUpUser() {
+    GetUserResponse mockResponse = createMockResponse();
+    when(iUserService.postUser(any(PostUserRequest.class)))
+      .thenReturn(mockResponse);
 
-        // Assertions
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertEquals(mockResponse, responseEntity.getBody());
-    }
+    ResponseEntity<GetUserResponse> responseEntity = userController.signUpUser(
+      new PostUserRequest()
+    );
+    assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+    assertEquals(mockResponse, responseEntity.getBody());
+  }
 }
