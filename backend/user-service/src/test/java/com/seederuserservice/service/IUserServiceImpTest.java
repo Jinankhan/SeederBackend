@@ -50,7 +50,7 @@ class IUserServiceImpTest {
     when(converter.convertEntityToDto(any(User.class)))
       .thenReturn(new GetUserResponse());
 
-    GetUserResponse result = userService.postUser(postUserRequest);
+    GetUserResponse result = userService.saveUser(postUserRequest);
 
     assertNotNull(result);
     verify(userRepository, times(1)).findByEmail(email);
@@ -69,7 +69,7 @@ class IUserServiceImpTest {
     when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
     assertThrows(
       UserAlreadyExistsException.class,
-      () -> userService.postUser(postUserRequest)
+      () -> userService.saveUser(postUserRequest)
     );
     verify(userRepository, times(1)).findByEmail(email);
     verify(userRepository, never()).save(any(User.class));
@@ -118,7 +118,7 @@ class IUserServiceImpTest {
     when(converter.convertEntityToDto(any(User.class)))
       .thenReturn(new GetUserResponse());
 
-    GetUserResponse result = userService.patchUserDetails(userId, patchRequest);
+    GetUserResponse result = userService.updateUserInfo(userId, patchRequest);
 
     assertNotNull(result);
     assertEquals(100, existingUser.getCreditAmount());
@@ -136,7 +136,7 @@ class IUserServiceImpTest {
     when(userRepository.findById(userId)).thenReturn(Optional.empty());
     assertThrows(
       UserNotFoundException.class,
-      () -> userService.patchUserDetails(userId, patchRequest)
+      () -> userService.updateUserInfo(userId, patchRequest)
     );
     verify(userRepository, times(1)).findById(userId);
     verify(userRepository, never()).save(any(User.class));

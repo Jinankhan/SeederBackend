@@ -48,11 +48,11 @@ class UserControllerTest {
   void testPatchUser() {
     GetUserResponse mockResponse = createMockResponse();
     when(
-      iUserService.patchUserDetails(any(UUID.class), any(PatchRequest.class))
+      iUserService.updateUserInfo(any(UUID.class), any(PatchRequest.class))
     )
       .thenReturn(mockResponse);
 
-    ResponseEntity<GetUserResponse> responseEntity = userController.patchUse(
+    ResponseEntity<GetUserResponse> responseEntity = userController.updateUser(
       UUID.randomUUID(),
       new PatchRequest()
     );
@@ -63,7 +63,7 @@ class UserControllerTest {
   @Test
   void testSignUpUser() {
     GetUserResponse mockResponse = createMockResponse();
-    when(iUserService.postUser(any(PostUserRequest.class)))
+    when(iUserService.saveUser(any(PostUserRequest.class)))
       .thenReturn(mockResponse);
 
     ResponseEntity<GetUserResponse> responseEntity = userController.signUpUser(

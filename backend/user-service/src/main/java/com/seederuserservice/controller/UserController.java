@@ -14,33 +14,32 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 public class UserController {
 
+  private final IUserService userService;
 
-  private IUserService iUserService;
   @Autowired
-  public  UserController(IUserService iUserService)
-  {
-    this.iUserService=iUserService;
+  public UserController(IUserService iUserService) {
+    this.userService = iUserService;
   }
 
   @GetMapping("/email")
   public ResponseEntity<GetUserResponse> getUserByEmail(
     @RequestParam String email
   ) {
-    return ResponseEntity.ok(iUserService.getUserByEmail(email));
+    return ResponseEntity.ok(userService.getUserByEmail(email));
   }
 
   @PatchMapping("/{id}")
-  public ResponseEntity<GetUserResponse> patchUse(
+  public ResponseEntity<GetUserResponse> updateUser(
     @PathVariable UUID id,
     @RequestBody PatchRequest patchRequest
   ) {
-    return ResponseEntity.ok(iUserService.patchUserDetails(id, patchRequest));
+    return ResponseEntity.ok(userService.updateUserInfo(id, patchRequest));
   }
 
   @PostMapping
   public ResponseEntity<GetUserResponse> signUpUser(
     @Valid @RequestBody PostUserRequest postUserRequest
   ) {
-    return ResponseEntity.ok(iUserService.postUser(postUserRequest));
+    return ResponseEntity.ok(userService.saveUser(postUserRequest));
   }
 }

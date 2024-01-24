@@ -18,9 +18,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserServiceImp implements IUserService {
 
-  private UserRepository userRepository;
-  private BCryptPasswordEncoder passwordEncoder;
-  private Converter converter;
+  private final UserRepository userRepository;
+  private final BCryptPasswordEncoder passwordEncoder;
+  private final Converter converter;
 
   @Autowired
   public UserServiceImp(
@@ -34,7 +34,7 @@ public class UserServiceImp implements IUserService {
   }
 
   @Override
-  public GetUserResponse postUser(PostUserRequest postUserRequest) {
+  public GetUserResponse saveUser(PostUserRequest postUserRequest) {
     Optional<User> user = userRepository.findByEmail(
             postUserRequest.getEmail()
     );
@@ -64,7 +64,7 @@ public class UserServiceImp implements IUserService {
   }
 
   @Override
-  public GetUserResponse patchUserDetails(UUID id, PatchRequest patchRequest) {
+  public GetUserResponse updateUserInfo(UUID id, PatchRequest patchRequest) {
     User existingUser = userRepository
       .findById(id)
       .orElseThrow(() ->

@@ -6,7 +6,7 @@ import com.seederuserservice.dto.response.GetUserResponse;
 import java.util.UUID;
 
 public interface IUserService {
-  GetUserResponse postUser(PostUserRequest postUserRequest);
+  GetUserResponse saveUser(PostUserRequest postUserRequest);
   GetUserResponse getUserByEmail(String email);
-  GetUserResponse patchUserDetails(UUID id, PatchRequest patchRequest);
+  GetUserResponse updateUserInfo(UUID id, PatchRequest patchRequest);
 }

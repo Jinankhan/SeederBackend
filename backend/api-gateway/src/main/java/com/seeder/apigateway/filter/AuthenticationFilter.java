@@ -16,18 +16,24 @@ import org.springframework.web.server.ServerWebExchange;
 public class AuthenticationFilter
   extends AbstractGatewayFilterFactory<AuthenticationFilter.Config> {
 
-  @Autowired
-  private RouteValidator validator;
 
-  @Autowired
-  private RestTemplate template;
+  private final RouteValidator validator;
 
 
-  @Autowired
-  private JwtService jwtService;
+  private final RestTemplate template;
 
-  public AuthenticationFilter() {
+
+
+  private final JwtService jwtService;
+
+
+@Autowired
+  public AuthenticationFilter(RouteValidator validator ,RestTemplate template ,JwtService jwtService) {
     super(Config.class);
+    this.validator=validator;
+    this.template=template;
+    this.jwtService=jwtService;
+
   }
 
   @Override
@@ -69,7 +75,9 @@ public class AuthenticationFilter
     );
   }
 
-  public static class Config {}
+  public static class Config {
+
+  }
 
   public ServerWebExchange validateTokenAndAddHeader(
     ServerWebExchange exchange,
