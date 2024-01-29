@@ -31,9 +31,9 @@ spring:
           filters:
             - AuthenticationFilter
         - id: PAYMENT-SERVICE
-          uri: lb://CONTRACTS-SERVICE
+          uri: lb://PAYMENT-SERVICE
           predicates:
-            - Path=/api/v1/contracts/**
+            - Path=/api/v1/payments/**
           filters:
             - AuthenticationFilter
 
