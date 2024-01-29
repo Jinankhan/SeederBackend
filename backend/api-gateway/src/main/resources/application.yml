@@ -1,44 +1,53 @@
 server:
-  port:
-    9191
+  port: 9191
 
 spring:
   application:
-    name:
-      api-gateway
+    name: API-GATEWAY
   cloud:
     gateway:
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+      discovery:
+        locator:
+          enabled: true
+          lowerCaseServiceId: true
       globalcors:
         corsConfigurations:
           '[/**]':
             allowedOrigins: "*"
             allowedHeaders: "*"
-            allowedMethods:
-              - GET
-              - POST
-              - DELETE
-              - PUT
-              - PATCH
+            allowedMethods: "*"
+
       routes:
         - id: USER-SERVICE
           uri: lb://USER-SERVICE
           predicates:
             - Path=/api/v1/users/**
-        - id: CASHKICK-SERVICE
-          uri: lb://CASHKICK-SERVICE
+        - id: CASHKICKS-SERVICE
+          uri: lb://CASHKICKS-SERVICE
           predicates:
-            - Path=/api/v1/cashkicks/**
+            - Path=/api/v1/cashkicks/**,/api/v1/user-contracts/**
+          filters:
+            - AuthenticationFilter
         - id: PAYMENT-SERVICE
-          uri: lb://PAYMENT-SERVICE
+          uri: lb://CONTRACTS-SERVICE
           predicates:
-            - Path=/api/v1/payments/**
+            - Path=/api/v1/contracts/**
+          filters:
+            - AuthenticationFilter
 
 eureka:
   client:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-      defaultZone:
-        http://localhost:8761/eureka/
+      defaultZone: http://localhost:8761/eureka/
   instance:
     hostname: localhost
+
+application:
+  security:
+    jwt:
+      secret-key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      expiration: 86400000
