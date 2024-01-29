@@ -11,6 +11,6 @@ import lombok.Setter;
 @NoArgsConstructor
 public class PatchRequest {
 
-  String password;
-  double creditAmount;
+  private String password;
+  private double creditAmount;
 }

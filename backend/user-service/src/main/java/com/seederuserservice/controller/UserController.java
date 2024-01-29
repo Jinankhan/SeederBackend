@@ -21,7 +21,7 @@ public class UserController {
     this.userService = iUserService;
   }
 
-  @GetMapping("/email")
+  @GetMapping
   public ResponseEntity<GetUserResponse> getUserByEmail(
     @RequestParam String email
   ) {

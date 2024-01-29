@@ -7,6 +7,12 @@ import java.util.UUID;
 
 public interface IUserService {
   GetUserResponse saveUser(PostUserRequest postUserRequest);
+
   GetUserResponse getUserByEmail(String email);
+
   GetUserResponse updateUserInfo(UUID id, PatchRequest patchRequest);
+
+
+
+
 }
