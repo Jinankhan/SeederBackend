@@ -1,5 +1,7 @@
 package com.seeder.cashkickservice.utils;
 
+import com.seeder.cashkickservice.dto.response.GetContract;
+
 public class Constants {
 
   private Constants() {}
@@ -19,4 +21,12 @@ public class Constants {
     "provide a valid per-payment amount";
   public static final String TYPE_ERROR =
     "type  should be within 5-10 characters only";
+
+  public static final GetContract updateContractDto(
+    GetContract getContract,
+    double termLength
+  ) {
+    getContract.setTermLength(termLength + "%");
+    return getContract;
+  }
 }
