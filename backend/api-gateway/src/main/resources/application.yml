@@ -24,10 +24,10 @@ spring:
           uri: lb://USER-SERVICE
           predicates:
             - Path=/api/v1/users/**
-        - id: CASHKICKS-SERVICE
-          uri: lb://CASHKICKS-SERVICE
+        - id: CASHKICK-SERVICE
+          uri: lb://CASHKICK-SERVICE
           predicates:
-            - Path=/api/v1/cashkicks/**,/api/v1/user-contracts/**
+            - Path=/api/v1/cashkicks/**,/api/v1/contracts/**
           filters:
             - AuthenticationFilter
         - id: PAYMENT-SERVICE

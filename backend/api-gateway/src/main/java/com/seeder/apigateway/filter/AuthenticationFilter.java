@@ -25,22 +25,20 @@ public class AuthenticationFilter
 
   private EurekaDiscoveryClient discoveryClient;
 
-
   private JwtService jwtService;
 
   @Autowired
   public AuthenticationFilter(
     RouteValidator validator,
     RestTemplate template,
-    JwtService jwtService,
-    EurekaDiscoveryClient discoveryClient
+    EurekaDiscoveryClient discoveryClient,
+    JwtService jwtService
   ) {
     super(Config.class);
     this.validator = validator;
     this.template = template;
     this.jwtService = jwtService;
-    this.discoveryClient=discoveryClient;
-    
+    this.discoveryClient = discoveryClient;
   }
 
   @Override
