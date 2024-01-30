@@ -23,22 +23,22 @@ public class AuthenticationFilter
 
   private final RestTemplate template;
 
-  @Autowired
   private EurekaDiscoveryClient discoveryClient;
 
-  @Autowired
   private JwtService jwtService;
 
   @Autowired
   public AuthenticationFilter(
     RouteValidator validator,
     RestTemplate template,
+    EurekaDiscoveryClient discoveryClient,
     JwtService jwtService
   ) {
     super(Config.class);
     this.validator = validator;
     this.template = template;
     this.jwtService = jwtService;
+    this.discoveryClient = discoveryClient;
   }
 
   @Override
@@ -103,7 +103,7 @@ public class AuthenticationFilter
     jwtService.validateToken(authHeader);
     String userEmailId = jwtService.getEmailFromJwtToken(authHeader);
     UserResponse userResponse = template.getForObject(
-      "http://localhost:9001/api/v1/users/email?email=" + userEmailId,
+      "http://localhost:9001/api/v1/users?email=" + userEmailId,
       UserResponse.class
     );
     ServerHttpRequest request = exchange

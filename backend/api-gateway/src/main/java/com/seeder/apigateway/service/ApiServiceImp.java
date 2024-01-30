@@ -35,7 +35,7 @@ public class ApiServiceImp implements IApiService {
     try {
 
       User user = restTemplate.getForObject(
-              "http://localhost:9001/api/v1/users/email?email=" +
+              "http://localhost:9001/api/v1/users?email=" +
                       authenticationRequest.getEmail(),
               User.class
       );
