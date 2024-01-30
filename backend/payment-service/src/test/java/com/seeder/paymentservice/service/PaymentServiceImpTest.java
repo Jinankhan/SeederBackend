@@ -3,7 +3,6 @@ package com.seeder.paymentservice.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
-
 import com.seeder.paymentservice.dto.request.PostPayment;
 import com.seeder.paymentservice.dto.response.GetPayment;
 import com.seeder.paymentservice.dto.response.SavePayment;
@@ -107,16 +106,16 @@ class PaymentServiceImpTest {
 
   @Test
   void generateMonthlyPaymentInstallments() {
-    double outstandingAmount = 18000.0;
-    double expectedAmount = 14000.0;
-    Date dueDate = new Date();
-    String status = "PAID";
-
+    Payment payment = new Payment(
+      UUID.randomUUID(),
+      new Date(),
+      4500,
+      20000,
+      "Upcoming",
+      UUID.randomUUID()
+    );
     List<GetPayment> result = paymentService.generateMonthlyPaymentInstallments(
-      outstandingAmount,
-      expectedAmount,
-      dueDate,
-      status
+      payment
     );
     assertEquals(
       12,

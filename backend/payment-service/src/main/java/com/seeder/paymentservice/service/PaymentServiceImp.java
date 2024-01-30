@@ -31,12 +31,9 @@ public class PaymentServiceImp implements IPaymentService {
       throw new PaymentsNotFoundException("Payments not found");
     }
 
-    return generateMonthlyPaymentInstallments(
-      userPayments.get(userPayments.size() - 1).getOutstandingAmount(),
-      userPayments.get(userPayments.size() - 1).getExpectedAmount(),
-      userPayments.get(userPayments.size() - 1).getDueDate(),
-      userPayments.get(userPayments.size() - 1).getStatus()
-    );
+    Payment payment = userPayments.get(userPayments.size() - 1);
+
+    return generateMonthlyPaymentInstallments(payment);
   }
 
   @Override
@@ -49,20 +46,15 @@ public class PaymentServiceImp implements IPaymentService {
     return converter.entityToSavePayment(paymentRepository.save(payment));
   }
 
-  public List<GetPayment> generateMonthlyPaymentInstallments(
-    double outstandingAmount,
-    double expectedAmount,
-    Date dueDate,
-    String status
-  ) {
+  public List<GetPayment> generateMonthlyPaymentInstallments(Payment payment) {
     Calendar calendar = Calendar.getInstance();
-    calendar.setTime(dueDate);
+    calendar.setTime(payment.getDueDate());
     List<GetPayment> payments = new ArrayList<>();
-    double currentAmount = outstandingAmount;
+    double currentAmount = payment.getOutstandingAmount();
 
     for (int x = 0; x < 12; x++) {
       calendar.add(Calendar.MONTH, 1);
-      currentAmount = Math.round(currentAmount - expectedAmount);
+      currentAmount = Math.round(currentAmount - payment.getExpectedAmount());
       currentAmount = Math.max(currentAmount, 0);
       long daysDifference =
         (
@@ -72,9 +64,9 @@ public class PaymentServiceImp implements IPaymentService {
       payments.add(
         new GetPayment(
           calendar.getTime(),
-          expectedAmount,
+          payment.getExpectedAmount(),
           currentAmount,
-          status,
+          payment.getStatus(),
           daysDifference + Constant.DAYS_REMAINING_MESSAGE
         )
       );
